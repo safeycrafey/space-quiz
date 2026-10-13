@@ -32,6 +32,8 @@ h1{font-size:20px;margin:0 0 16px;text-align:center}
 .emoji{font-size:64px;animation:pop .6s}
 .big{font-size:32px;font-weight:700;margin:6px 0}
 .result p{color:var(--muted);margin:0 0 20px}
+.best{font-size:14px;margin:-8px 0 20px}
+.newbest{color:var(--good);font-weight:700;margin-left:6px}
 .card{position:relative;border-radius:6px;border-color:var(--accent);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
 .card::before,.card::after{content:"";position:absolute;width:16px;height:16px;border:2px solid var(--accent);pointer-events:none}
 .card::before{top:-2px;left:-2px;border-right:0;border-bottom:0}
@@ -111,11 +113,19 @@ function pick(k){
   n.textContent=i===Q.length-1?"See results":"Next question →";
   n.onclick=()=>{i++;i<Q.length?show():end()};n.focus();
 }
+const BEST_KEY="spaceQuizBest";
+function loadBest(){
+  try{const v=parseInt(localStorage.getItem(BEST_KEY),10);return Number.isInteger(v)&&v>=0&&v<=Q.length?v:null}catch(_){return null}
+}
+function saveBest(v){try{localStorage.setItem(BEST_KEY,String(v))}catch(_){}}
 function end(){
   const p=score/Q.length;
   const [e,m]=p===1?["🏆","Mission commander material!"]:p>=.8?["🚀","Stellar performance!"]:p>=.5?["🌍","Solid orbit — keep exploring."]:p>=.3?["🛰️","Drifting a bit. Try again!"]:["☄️","Houston, we have a problem."];
+  const prev=loadBest(),isNew=prev===null||score>prev,best=isNew?score:prev;
+  if(isNew)saveBest(score);
   card.innerHTML=`<div class="result fade"><div class="bar"><div style="width:100%"></div></div><div class="emoji">${e}</div>
-  <div class="big">${score} / ${Q.length}</div><p>${m}</p><button class="btn" id="again">Play again</button></div>`;
+  <div class="big">${score} / ${Q.length}</div><p>${m}</p>
+  <div class="best" role="status">Best: ${best} / ${Q.length}${isNew?' <span class="newbest">★ New best!</span>':""}</div><button class="btn" id="again">Play again</button></div>`;
   document.getElementById("again").onclick=()=>{i=0;score=0;answered=0;show()};
 }
 show();
