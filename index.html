@@ -97,7 +97,7 @@ function show(){
   telemetry();
   requestAnimationFrame(()=>card.querySelector(".bar div").style.width=(i/Q.length*100)+"%");
   const box=document.getElementById("opts");
-  o.forEach((t,k)=>{const b=document.createElement("button");b.className="opt";b.dataset.key="ABCD"[k]+".";b.textContent=t;b.onclick=()=>pick(k);box.appendChild(b)});
+  o.forEach((t,k)=>{const b=document.createElement("button");b.className="opt";b.dataset.key="ABCD"[k]+".";b.setAttribute("aria-keyshortcuts","ABCD"[k]+" "+(k+1));b.textContent=t;b.onclick=()=>pick(k);box.appendChild(b)});
 }
 function telemetry(){
   document.getElementById("sc").textContent=String(score).padStart(2,"0");
@@ -115,6 +115,16 @@ function pick(k){
   n.textContent=i===Q.length-1?"See results":"Next question →";
   n.onclick=()=>{i++;i<Q.length?show():end()};n.focus();
 }
+document.addEventListener("keydown",e=>{
+  if(e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key==="Enter"){
+    const n=document.getElementById("next");
+    if(n&&!n.hidden&&document.activeElement!==n){e.preventDefault();n.click()}
+    return;
+  }
+  const k="abcd1234".indexOf(e.key.toLowerCase())%4;
+  if(e.key.length===1&&"abcd1234".includes(e.key.toLowerCase())&&document.querySelector(".opt")){e.preventDefault();pick(k)}
+});
 const BEST_KEY="spaceQuizBest";
 function loadBest(){
   try{const v=parseInt(localStorage.getItem(BEST_KEY),10);return Number.isInteger(v)&&v>=0&&v<=Q.length?v:null}catch(_){return null}
