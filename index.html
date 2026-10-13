@@ -78,10 +78,12 @@ const Q=[
 ["What is the name of the first space station, launched in 1971?",["Mir","Skylab","Salyut 1","ISS"],2]
 ];
 const card=document.getElementById("card");
-let i=0,score=0,answered=0,locked=false;
+function shuffle(a){a=[...a];for(let n=a.length-1;n>0;n--){const j=Math.floor(Math.random()*(n+1));[a[n],a[j]]=[a[j],a[n]]}return a}
+function deal(){return shuffle(Q).map(([q,o,c])=>{const s=shuffle(o.map((t,k)=>[t,k===c]));return [q,s.map(x=>x[0]),s.findIndex(x=>x[1])]})}
+let G=deal(),i=0,score=0,answered=0,locked=false;
 function show(){
   locked=false;
-  const [q,o]=Q[i];
+  const [q,o]=G[i];
   card.innerHTML=`<div class="fade"><div class="top">
   <div class="cell"><small>Checkpoint</small><b>${String(i+1).padStart(2,"0")}/${Q.length}</b></div>
   <div class="cell"><small>Score</small><b id="sc"></b></div>
@@ -101,7 +103,7 @@ function telemetry(){
 }
 function pick(k){
   if(locked)return;locked=true;
-  const a=Q[i][2],bs=[...document.querySelectorAll(".opt")],fb=document.getElementById("fb");
+  const a=G[i][2],bs=[...document.querySelectorAll(".opt")],fb=document.getElementById("fb");
   bs.forEach(b=>b.disabled=true);
   bs[a].classList.add("correct");
   if(k===a){score++;fb.textContent="✅ Correct!";fb.className="fb good"}
@@ -116,7 +118,7 @@ function end(){
   const [e,m]=p===1?["🏆","Mission commander material!"]:p>=.8?["🚀","Stellar performance!"]:p>=.5?["🌍","Solid orbit — keep exploring."]:p>=.3?["🛰️","Drifting a bit. Try again!"]:["☄️","Houston, we have a problem."];
   card.innerHTML=`<div class="result fade"><div class="bar"><div style="width:100%"></div></div><div class="emoji">${e}</div>
   <div class="big">${score} / ${Q.length}</div><p>${m}</p><button class="btn" id="again">Play again</button></div>`;
-  document.getElementById("again").onclick=()=>{i=0;score=0;answered=0;show()};
+  document.getElementById("again").onclick=()=>{G=deal();i=0;score=0;answered=0;show()};
 }
 show();
 </script>
